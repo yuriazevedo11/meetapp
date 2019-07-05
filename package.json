@@ -1,0 +1,17 @@
+{
+  "name": "meetapp",
+  "version": "1.0.0",
+  "repository": "github.com:yuriazevedo11/meetapp",
+  "author": "Yuri Azevedo <yuriazevedo11@gmail.com>",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon src/server.js"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "nodemon": "^1.19.1"
+  },
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
