@@ -1,9 +1,42 @@
 import * as Yup from 'yup';
-import { isBefore, parseISO } from 'date-fns';
+import { Op } from 'sequelize';
+import { isBefore, parseISO, startOfDay, endOfDay, isValid } from 'date-fns';
 
 import Meetup from '../models/Meetup';
+import User from '../models/User';
 
 class MeetupController {
+  async index(req, res) {
+    const { page = 1, date } = req.query;
+    const parsedDate = parseISO(date);
+
+    if (!isValid(parsedDate)) {
+      return res.status(400).json({ error: 'Invalid date' });
+    }
+
+    const meetups = await Meetup.findAll({
+      where: {
+        date: {
+          [Op.between]: [startOfDay(parsedDate), endOfDay(parsedDate)],
+        },
+      },
+      attributes: {
+        exclude: ['user_id'],
+      },
+      include: [
+        {
+          model: User,
+          as: 'user',
+          attributes: ['id', 'name', 'email'],
+        },
+      ],
+      limit: 10,
+      offset: (page - 1) * 10,
+    });
+
+    return res.json(meetups);
+  }
+
   async store(req, res) {
     const schema = Yup.object().shape({
       title: Yup.string().required(),
