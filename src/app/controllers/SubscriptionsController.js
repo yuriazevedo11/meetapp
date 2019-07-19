@@ -1,8 +1,31 @@
+import { Op } from 'sequelize';
+
 import User from '../models/User';
 import Meetup from '../models/Meetup';
 import Subscription from '../models/Subscription';
 
 class SubscriptionsController {
+  async index(req, res) {
+    const subscriptions = await Subscription.findAll({
+      where: {
+        user_id: req.userId,
+      },
+      include: {
+        model: Meetup,
+        as: 'meetup',
+        required: true,
+        where: {
+          date: {
+            [Op.gte]: new Date(),
+          },
+        },
+      },
+      order: [[Meetup, 'date']],
+    });
+
+    return res.json(subscriptions);
+  }
+
   async store(req, res) {
     const user = await User.findByPk(req.userId);
     const meetup = await Meetup.findByPk(req.params.meetupId, {
@@ -36,16 +59,14 @@ class SubscriptionsController {
       where: {
         user_id: user.id,
       },
-      include: [
-        {
-          model: Meetup,
-          as: 'meetup',
-          required: true,
-          where: {
-            date: meetup.date,
-          },
+      include: {
+        model: Meetup,
+        as: 'meetup',
+        required: true,
+        where: {
+          date: meetup.date,
         },
-      ],
+      },
     });
 
     if (checkDate) {
