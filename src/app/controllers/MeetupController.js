@@ -26,8 +26,7 @@ class MeetupController {
       include: [
         {
           model: User,
-          as: 'user',
-          attributes: ['id', 'name', 'email'],
+          attributes: ['name', 'email'],
         },
       ],
       limit: 10,
@@ -80,7 +79,7 @@ class MeetupController {
     const meetup = await Meetup.findByPk(req.params.id);
 
     if (meetup.past) {
-      return res.status(400).json({ error: `Can't update past meetups` });
+      return res.status(400).json({ error: 'Can not update past meetups' });
     }
 
     if (isBefore(parseISO(req.body.date), new Date())) {
