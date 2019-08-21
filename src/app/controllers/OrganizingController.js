@@ -15,6 +15,7 @@ class OrganizingController {
           attributes: ['path', 'url'],
         },
       ],
+      order: [['updatedAt', 'DESC']],
     });
 
     return res.json(organizedMeetups);
