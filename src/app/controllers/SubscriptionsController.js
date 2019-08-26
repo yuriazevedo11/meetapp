@@ -104,6 +104,10 @@ class SubscriptionsController {
       include: Meetup,
     });
 
+    if (!subscription) {
+      return res.status(400).json({ error: 'Subscription does not exists' });
+    }
+
     if (subscription.Meetup.past) {
       return res
         .status(400)

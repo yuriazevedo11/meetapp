@@ -2,6 +2,7 @@ import * as Yup from 'yup';
 import { Op } from 'sequelize';
 import { isBefore, parseISO, startOfDay, endOfDay, isValid } from 'date-fns';
 
+import Subscription from '../models/Subscription';
 import Meetup from '../models/Meetup';
 import User from '../models/User';
 import File from '../models/File';
@@ -24,9 +25,6 @@ class MeetupController {
           [Op.between]: [startOfDay(parsedDate), endOfDay(parsedDate)],
         },
       },
-      attributes: {
-        exclude: ['user_id', 'image_id'],
-      },
       include: [
         {
           model: User,
@@ -39,9 +37,24 @@ class MeetupController {
       ],
       limit: 10,
       offset: (page - 1) * 10,
+      order: ['date'],
     });
 
-    return res.json(meetups);
+    /**
+     * Return all meetups that are not subscribed by user
+     */
+
+    const subscriptionMeetupIds = (await Subscription.findAll({
+      where: {
+        user_id: req.userId,
+      },
+    })).map(subscription => subscription.meetup_id);
+
+    const meetupsNotSubscribed = meetups.filter(
+      meetup => !subscriptionMeetupIds.includes(meetup.id)
+    );
+
+    return res.json(meetupsNotSubscribed);
   }
 
   async store(req, res) {
